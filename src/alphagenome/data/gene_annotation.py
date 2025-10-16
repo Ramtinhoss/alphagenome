@@ -175,6 +175,28 @@ def filter_to_longest_transcript(
   return gtf[gtf['transcript_id'].isin(longest_transcripts['transcript_id'])]
 
 
+def filter_to_mane_select_transcript(gtf: pd.DataFrame) -> pd.DataFrame:
+  """Filter GTF entries to only the MANE select transcript.
+
+  Note that the MANE_Select tag only exists for the human GTF file.
+
+  Args:
+    gtf: pd.DataFrame of GENCODE GTF entries. Must contain columns 'tag'.
+
+  Returns:
+    pd.DataFrame of GENCODE GTF entries subset to rows representing MANE
+    select transcripts, which are transcripts that are well-supported,
+    conserved, and expressed.
+  """
+  filtered_gtf = gtf[gtf['tag'].fillna('').str.contains('MANE_Select')]
+  if filtered_gtf.empty:
+    raise ValueError(
+        'No MANE_Select transcripts found in the GTF, possibly due to non-human'
+        ' GTF.'
+    )
+  return filtered_gtf
+
+
 def filter_transcript_support_level(
     gtf: pd.DataFrame,
     transcript_support_levels: str | Sequence[str],

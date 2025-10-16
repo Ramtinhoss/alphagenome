@@ -256,6 +256,14 @@ class FilterGTFTest(parameterized.TestCase):
         'Strand': ['+', '+', '+', '-', '-', '-'],
         'Feature': 'transcript',
         'transcript_support_level': ['1', '2', '3', '1', '1', '2'],
+        'tag': [
+            'basic,MANE_Select',
+            pd.NA,
+            'basic,Ensembl_canonical',
+            pd.NA,
+            pd.NA,
+            pd.NA,
+        ],
     })
 
   def test_filter_to_longest_transcript(self):
@@ -265,6 +273,16 @@ class FilterGTFTest(parameterized.TestCase):
     self.assertSequenceEqual(
         list(longest_transcript_gtf.transcript_id), ['A1', 'B1', 'C1']
     )
+
+  def test_filter_to_mane_select_transcript(self):
+    mane_select_gtf = gene_annotation.filter_to_mane_select_transcript(self.gtf)
+    self.assertSequenceEqual(list(mane_select_gtf.transcript_id), ['A1'])
+
+  def test_filter_to_mane_select_transcript_raises_error(self):
+    with self.assertRaises(ValueError):
+      gene_annotation.filter_to_mane_select_transcript(
+          self.gtf[self.gtf['tag'].isna()]
+      )
 
   @parameterized.parameters([
       dict(
