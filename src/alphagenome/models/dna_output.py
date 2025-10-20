@@ -13,7 +13,7 @@
 # limitations under the License.
 """Module for AlphaGenome model outputs."""
 
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 import dataclasses
 import enum
 from typing import Literal
@@ -377,6 +377,28 @@ class OutputMetadata:
         return self.contact_maps
       case OutputType.PROCAP:
         return self.procap
+
+  @classmethod
+  def from_outputs(
+      cls,
+      outputs: Mapping[
+          OutputType, track_data.TrackData | junction_data.JunctionData
+      ],
+  ) -> 'OutputMetadata':
+    """Creates an `OutputMetadata` from a mapping of output types to data.
+
+    Args:
+      outputs: A mapping from `OutputType` to `TrackData` or `JunctionData`.
+
+    Returns:
+      An `OutputMetadata` object.
+    """
+    kwargs = {}
+    for field in dataclasses.fields(cls):
+      output_type = field.metadata['output_type']
+      if data := outputs.get(output_type):
+        kwargs[field.name] = data.metadata
+    return cls(**kwargs)
 
   def concatenate(self) -> track_data.TrackMetadata:
     """Concatenates all metadata into a single DataFrame.

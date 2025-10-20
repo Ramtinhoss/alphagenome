@@ -387,6 +387,24 @@ class OutputTest(parameterized.TestCase):
     self.assertIsNone(output_sum.rna_seq)
     self.assertIsNotNone(output_sum.atac)
 
+  def test_output_metadata_from_outputs(self):
+    output = _get_output()
+    mapping = {
+        dna_output.OutputType.ATAC: output.atac,
+        dna_output.OutputType.CAGE: output.cage,
+        dna_output.OutputType.DNASE: output.dnase,
+        dna_output.OutputType.RNA_SEQ: output.rna_seq,
+    }
+    output_metadata = dna_output.OutputMetadata.from_outputs(mapping)
+    for output_type in dna_output.OutputType:
+      if output_type in mapping:
+        self.assertIs(
+            output_metadata.get(output_type),
+            output.get(output_type).metadata,  # pytype: disable=attribute-error
+        )
+      else:
+        self.assertIsNone(output_metadata.get(output_type))
+
   def test_output_metadata_concatenate(self):
     output_metadata = dna_output.OutputMetadata(
         atac=track_data.TrackMetadata(
